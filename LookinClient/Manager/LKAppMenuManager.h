@@ -22,6 +22,7 @@
 - (void)appMenuManagerDidSelectIncreaseInterspace;
 - (void)appMenuManagerDidSelectExpansionIndex:(NSUInteger)index;
 - (void)appMenuManagerDidSelectFilter;
+- (void)appMenuManagerDidSelectDelayReload;
 - (void)appMenuManagerDidSelectMethodTrace;
 
 - (void)appMenuManagerDidSelectExport;

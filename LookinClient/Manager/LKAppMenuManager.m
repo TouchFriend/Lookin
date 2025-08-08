@@ -33,6 +33,7 @@ static NSUInteger const kTag_DecreaseInterspace = 25;
 static NSUInteger const kTag_IncreaseInterspace = 26;
 static NSUInteger const kTag_Expansion = 27;
 static NSUInteger const kTag_Filter = 28;
+static NSUInteger const kTag_DelayReload = 29;
 static NSUInteger const kTag_OpenInNewWindow = 31;
 static NSUInteger const kTag_Export = 32;
 
@@ -48,6 +49,7 @@ static NSUInteger const kTag_LookinClientGitHub = 58;
 static NSUInteger const kTag_LookinServerGitHub = 59;
 
 static NSUInteger const kTag_ReportIssues = 60;
+static NSUInteger const kTag_Email = 61;
 static NSUInteger const kTag_LookinClientGitHubIssues = 62;
 static NSUInteger const kTag_LookinServerGitHubIssues = 63;
 static NSUInteger const kTag_Weibo = 64;
@@ -93,6 +95,7 @@ static NSUInteger const kTag_Acknowledgements = 72;
                                    @(kTag_Export):NSStringFromSelector(@selector(appMenuManagerDidSelectExport)),
                                    @(kTag_OpenInNewWindow):NSStringFromSelector(@selector(appMenuManagerDidSelectOpenInNewWindow)),
                                    @(kTag_Filter):NSStringFromSelector(@selector(appMenuManagerDidSelectFilter)),
+                                   @(kTag_DelayReload):NSStringFromSelector(@selector(appMenuManagerDidSelectDelayReload)),
                                    @(kTag_MethodTrace):NSStringFromSelector(@selector(appMenuManagerDidSelectMethodTrace)),
     };
     
@@ -165,6 +168,11 @@ static NSUInteger const kTag_Acknowledgements = 72;
     }
     
     NSMenu *issuesMenu = [menu_help itemWithTag:kTag_ReportIssues].submenu;
+    {
+        NSMenuItem *item = [issuesMenu itemWithTag:kTag_Email];
+        item.target = self;
+        item.action = @selector(_handleEmail);
+    }
     {
         NSMenuItem *item = [issuesMenu itemWithTag:kTag_LookinClientGitHubIssues];
         item.target = self;
@@ -306,6 +314,14 @@ static NSUInteger const kTag_Acknowledgements = 72;
 
 - (void)_handleShowLookinServerGithub {
     [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/QMUI/LookinServer"]];
+}
+
+- (void)_handleEmail {
+    NSString *stringToCopy = @"lookin@lookin.work";
+    
+    NSPasteboard *paste = [NSPasteboard generalPasteboard];
+    [paste clearContents];
+    [paste writeObjects:@[stringToCopy]];
 }
 
 - (void)_handleClientIssues {

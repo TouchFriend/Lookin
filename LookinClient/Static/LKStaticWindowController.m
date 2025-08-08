@@ -43,6 +43,8 @@
 @property(nonatomic, assign) BOOL isFetchingHierarchy;
 @property(nonatomic, assign) BOOL isFetchingDetails;
 
+@property(nonatomic, strong) RACSubject *removeDelayReloadCounting_Signal;
+
 @end
 
 @implementation LKStaticWindowController
@@ -98,6 +100,12 @@
             NSButton *measureButton = (NSButton *)self.toolbarItemsMap[LKToolBarIdentifier_Measure].view;
             BOOL canMeasure = !!x;
             measureButton.enabled = canMeasure;
+        }];
+        
+        self.removeDelayReloadCounting_Signal = [RACSubject subject];
+        [self.removeDelayReloadCounting_Signal subscribeNext:^(id  _Nullable x) {
+            @strongify(self);
+            [self.viewController removeDelayReloadTip];
         }];
     }
     return self;
@@ -215,6 +223,9 @@
 }
 
 - (void)_handleReload {
+    // 停止可能存在的刷新倒计时
+    [self.removeDelayReloadCounting_Signal sendNext:nil];
+
     if (self.isFetchingDetails) {
         // 停止拉取
         [[LKStaticAsyncUpdateManager sharedInstance] endUpdating];
@@ -255,7 +266,9 @@
 }
 
 - (void)_handleApp {
-    // 停止可能存在的刷新倒计时    
+    // 停止可能存在的刷新倒计时
+    [self.removeDelayReloadCounting_Signal sendNext:nil];
+    
     [self popupAllInspectableAppsWithSource:MenuPopoverAppsListControllerEventSourceAppButton];
 }
 
@@ -531,6 +544,26 @@
 
 - (void)detailUpdateReceivedError:(NSError *)error {
     AlertError(error, self.window);
+}
+
+- (void)appMenuManagerDidSelectDelayReload {
+    [self.removeDelayReloadCounting_Signal sendNext:nil];
+
+    __block NSUInteger seconds = 5;
+    [self.viewController showDelayReloadTipWithSeconds:seconds];
+    @weakify(self);
+    [[[[RACSignal interval:1 onScheduler:[RACScheduler scheduler]] takeUntil:self.removeDelayReloadCounting_Signal] deliverOnMainThread] subscribeNext:^(NSDate * _Nullable x) {
+        @strongify(self);
+        seconds--;
+        if (seconds <= 0) {
+            [self.removeDelayReloadCounting_Signal sendNext:nil];
+            [self appMenuManagerDidSelectReload];
+        } else {
+            [self.viewController showDelayReloadTipWithSeconds:seconds];
+        }
+    }];
+    
+    [MSACAnalytics trackEvent:@"Delay Reload"];
 }
 
 - (void)appMenuManagerDidSelectMethodTrace {
