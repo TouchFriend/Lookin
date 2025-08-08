@@ -12,6 +12,10 @@
 
 + (instancetype)sharedInstance;
 
+@property(nonatomic, assign) BOOL methodTrace;
+
+@property(nonatomic, assign) BOOL USBLowSpeed;
+
 @property(nonatomic, assign) BOOL togglePreview;
 
 @property(nonatomic, assign) BOOL quickSelection;

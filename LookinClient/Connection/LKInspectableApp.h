@@ -12,7 +12,7 @@
 #import "LookinCustomAttrModification.h"
 #import "LookinAttributesGroup.h"
 
-@class Lookin_PTChannel, LookinDisplayItemTrace, LookinInvocationRequest, LookinHierarchyInfo, LookinStaticAsyncUpdateTasksPackage, LookinStaticAsyncUpdateTask;
+@class Lookin_PTChannel, LookinDisplayItemTrace, LookinInvocationRequest, LookinHierarchyInfo, LookinMethodTraceRecord, LookinStaticAsyncUpdateTasksPackage, LookinStaticAsyncUpdateTask;
 
 @interface LKInspectableApp : NSObject
 
@@ -34,7 +34,13 @@
 
 - (RACSignal *)fetchObjectWithOid:(unsigned long)oid;
 
+- (RACSignal *)fetchClassesAndMethodTraceList;
+
 - (RACSignal *)fetchSelectorNamesWithClass:(NSString *)className hasArg:(BOOL)hasArg;
+
+- (RACSignal *)addMethodTraceWithClassName:(NSString *)className selName:(NSString *)selName;
+
+- (RACSignal *)deleteMethodTraceWithClassName:(NSString *)className selName:(NSString *)selName;
 
 - (RACSignal *)invokeMethodWithOid:(unsigned long)oid text:(NSString *)text;
 
@@ -45,5 +51,7 @@
 - (RACSignal *)modifyGestureRecognizer:(unsigned long)oid toBeEnabled:(BOOL)shouldBeEnabled;
 
 #pragma mark - Push From iOS
+
+- (void)handleMethodTraceRecord:(LookinMethodTraceRecord *)record;
 
 @end

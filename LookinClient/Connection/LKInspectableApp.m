@@ -10,6 +10,7 @@
 #import "LKConnectionManager.h"
 #import "LookinConnectionResponseAttachment.h"
 #import "LKNavigationManager.h"
+#import "LKMethodTraceDataSource.h"
 
 @implementation LKInspectableApp
 
@@ -47,8 +48,27 @@
     return [self _requestWithType:LookinRequestTypeFetchObject data:@(oid)];
 }
 
+- (RACSignal *)fetchClassesAndMethodTraceList {
+    return [self _requestWithType:LookinRequestTypeClassesAndMethodTraceLit data:nil];
+}
+
 - (RACSignal *)fetchSelectorNamesWithClass:(NSString *)className hasArg:(BOOL)hasArg {
     return [self _requestWithType:LookinRequestTypeAllSelectorNames data:@{@"className":className, @"hasArg":@(hasArg)}];
+}
+
+- (RACSignal *)addMethodTraceWithClassName:(NSString *)className selName:(NSString *)selName {
+    if (!className || !selName) {
+        return [RACSignal error:LookinErr_Inner];
+    }
+    return [self _requestWithType:LookinRequestTypeAddMethodTrace data:@{@"className": className, @"selName":selName}];
+}
+
+- (RACSignal *)deleteMethodTraceWithClassName:(NSString *)className selName:(NSString *)selName {
+    if (!className) {
+        return [RACSignal error:LookinErr_Inner];
+    }
+    NSDictionary *param = selName ? @{@"className": className, @"selName":selName} : @{@"className": className};
+    return [self _requestWithType:LookinRequestTypeDeleteMethodTrace data:param];
 }
 
 - (RACSignal *)invokeMethodWithOid:(unsigned long)oid text:(NSString *)text {
@@ -91,6 +111,9 @@
 
 #pragma mark - Push From iOS
 
+- (void)handleMethodTraceRecord:(LookinMethodTraceRecord *)record {
+    [[LKNavigationManager sharedInstance].activeMethodTraceDataSource handleReceivingRecord:record];
+}
 
 #pragma mark - Private
 

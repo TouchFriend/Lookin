@@ -20,6 +20,7 @@ static NSIndexSet * PushFrameTypeList() {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
+        [set addIndex:LookinPush_MethodTraceRecord];
         list = set.copy;
     });
     return list;

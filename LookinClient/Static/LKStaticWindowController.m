@@ -533,4 +533,8 @@
     AlertError(error, self.window);
 }
 
+- (void)appMenuManagerDidSelectMethodTrace {
+    [[LKNavigationManager sharedInstance] showMethodTrace];
+}
+
 @end

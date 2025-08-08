@@ -13,6 +13,7 @@
 #import "LookinAppInfo.h"
 #import "LookinHierarchyInfo.h"
 #import "LookinConnectionResponseAttachment.h"
+#import "LookinMethodTraceRecord.h"
 
 NSString *const LKInspectingAppDidEndNotificationName = @"LKInspectingAppDidEndNotificationName";
 
@@ -71,13 +72,21 @@ NSString *const LKInspectingAppDidEndNotificationName = @"LKInspectingAppDidEndN
             }
         }];
         
-//        [[LKConnectionManager sharedInstance].didReceivePush subscribeNext:^(RACTuple *x) {
-//            @strongify(self);
-//            RACTupleUnpack(Lookin_PTChannel *channel, NSNumber *type, NSObject *data) = x;
-//            if (channel != self.inspectingApp.channel) {
-//                return;
-//            }
-//        }];
+        [[LKConnectionManager sharedInstance].didReceivePush subscribeNext:^(RACTuple *x) {
+            @strongify(self);
+            RACTupleUnpack(Lookin_PTChannel *channel, NSNumber *type, NSObject *data) = x;
+            if (channel != self.inspectingApp.channel) {
+                return;
+            }
+            
+            if (type.intValue == LookinPush_MethodTraceRecord) {
+                if ([data isKindOfClass:[LookinMethodTraceRecord class]]) {
+                    [self.inspectingApp handleMethodTraceRecord:(LookinMethodTraceRecord *)data];
+                } else {
+                    NSAssert(NO, @"");
+                }
+            }
+        }];
         
     }
     return self;
